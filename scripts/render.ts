@@ -119,20 +119,24 @@ const main = async () => {
     entryPoint: path.join(projectRoot, 'src', 'index.tsx'),
   });
 
-  await renderVideo(serveUrl, 'usd-usdt', path.join(outDir, 'usd-usdt.mp4'), data[0]);
-  await renderVideo(serveUrl, 'otros-activos', path.join(outDir, 'otros-activos.mp4'), data[1]);
-  await renderStillImage(serveUrl, 'usd-usdt', path.join(outDir, 'usd-usdt.png'), data[0]);
-  await renderStillImage(serveUrl, 'otros-activos', path.join(outDir, 'otros-activos.png'), data[1]);
+  await renderVideo(serveUrl, 'usd-usdt', path.join(outDir, 'usdt.mp4'), data[0]);
+  await renderVideo(serveUrl, 'otros-activos', path.join(outDir, 'resto.mp4'), data[1]);
+  await renderStillImage(serveUrl, 'usd-usdt', path.join(outDir, 'usdt.png'), data[0]);
+  await renderStillImage(serveUrl, 'otros-activos', path.join(outDir, 'resto.png'), data[1]);
 
   if (additionalOutDir) {
     const additionalOutputs: [string, string][] = [
-      [path.join(outDir, 'usd-usdt.mp4'), path.join(additionalOutDir, 'usd.mp4')],
-      [path.join(outDir, 'otros-activos.mp4'), path.join(additionalOutDir, 'otros.mp4')],
-      [path.join(outDir, 'usd-usdt.png'), path.join(additionalOutDir, 'usd.png')],
-      [path.join(outDir, 'otros-activos.png'), path.join(additionalOutDir, 'otros.png')],
+      [path.join(outDir, 'usdt.mp4'), path.join(additionalOutDir, 'usdt.mp4')],
+      [path.join(outDir, 'resto.mp4'), path.join(additionalOutDir, 'resto.mp4')],
+      [path.join(outDir, 'usdt.png'), path.join(additionalOutDir, 'usdt.png')],
+      [path.join(outDir, 'resto.png'), path.join(additionalOutDir, 'resto.png')],
     ];
     await Promise.all(
       additionalOutputs.map(async ([source, destination]) => {
+        if (path.resolve(source) === path.resolve(destination)) {
+          return;
+        }
+
         await copyFile(source, destination);
         console.log(`Copia adicional generada: ${destination}`);
       }),
