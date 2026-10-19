@@ -1,6 +1,6 @@
-import {AbsoluteFill, interpolate, useCurrentFrame, useVideoConfig} from 'remotion';
+import {AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig} from 'remotion';
 import type {Quote, QuoteVideoProps} from './types';
-import {formatCurrency, formatDate, formatTrendValue, trendLabel} from './data';
+import {formatCurrency, formatDateTime, formatTrendValue, trendLabel} from './data';
 
 export const INTRO_FRAMES = 45;
 export const QUOTE_FRAMES = 150;
@@ -22,6 +22,30 @@ const accentFor = (quote: Quote) =>
     : quote.trend.direction === 'up'
       ? palette.green
       : palette.red;
+
+const QuoteTimestamp = ({timestamp, compact = false}: {timestamp: string; compact?: boolean}) => (
+  <div
+    style={{
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: compact ? 18 : 20,
+      padding: compact ? '18px 24px' : '20px 26px',
+      borderRadius: 18,
+      border: '1px solid rgba(240, 199, 119, .45)',
+      background: 'linear-gradient(110deg, rgba(240, 199, 119, .12), rgba(240, 199, 119, .04))',
+      boxShadow: '0 8px 30px rgba(0, 0, 0, .14)',
+      whiteSpace: 'nowrap',
+    }}
+  >
+    <div style={{width: 11, height: 11, borderRadius: '50%', background: palette.gold}} />
+    <div style={{fontSize: compact ? 24 : 26, fontWeight: 900, letterSpacing: compact ? 1 : 1.5, color: palette.gold}}>
+      ACTUALIZADO
+    </div>
+    <div style={{fontSize: compact ? 62 : 72, fontWeight: 800, color: palette.text}}>
+      {formatDateTime(timestamp)}
+    </div>
+  </div>
+);
 
 const Intro = ({title, subtitle, source}: Pick<QuoteVideoProps, 'title' | 'subtitle' | 'source'>) => {
   const frame = useCurrentFrame();
@@ -80,7 +104,7 @@ const Intro = ({title, subtitle, source}: Pick<QuoteVideoProps, 'title' | 'subti
         style={{
           width: 138,
           height: 7,
-          marginTop: 76,
+          marginTop: 48,
           borderRadius: 10,
           background: `linear-gradient(90deg, ${palette.green}, ${palette.gold})`,
         }}
@@ -140,7 +164,7 @@ const Tendency = ({quote, frame}: {quote: Quote; frame: number}) => {
         >
           {trendLabel[quote.trend.direction]}
         </div>
-        <div style={{marginTop: 18, fontSize: 60, fontWeight: 850, letterSpacing: -1.8, color: palette.text}}>
+        <div style={{marginTop: 18, fontSize: 76, fontWeight: 850, letterSpacing: -1.8, color: palette.text}}>
           {formatTrendValue(quote.trend.value, quote.currency)}
         </div>
       </div>
@@ -332,6 +356,9 @@ const QuoteSlide = ({
         <div style={{fontSize: 25, marginTop: 11, color: palette.muted, letterSpacing: 1.4}}>
           {quote.subtitle.toUpperCase()}
         </div>
+        <div style={{marginTop: 22}}>
+          <QuoteTimestamp timestamp={quote.updated_at} compact />
+        </div>
       </div>
 
       <div style={{position: 'relative', flex: 1, minHeight: 690, marginTop: 20}}>
@@ -374,14 +401,14 @@ const QuoteSlide = ({
             }}
           >
             <div style={{display: 'flex', alignItems: 'center', gap: 18}}>
-              <span style={{fontSize: 45, lineHeight: 1, color: accent, fontWeight: 900}}>
+              <span style={{fontSize: 54, lineHeight: 1, color: accent, fontWeight: 900}}>
                 {quote.trend.direction === 'up' ? '↗' : quote.trend.direction === 'down' ? '↘' : '→'}
               </span>
-              <span style={{fontSize: 23, fontWeight: 900, letterSpacing: 2, color: accent}}>
+              <span style={{fontSize: 28, fontWeight: 900, letterSpacing: 2, color: accent}}>
                 {trendLabel[quote.trend.direction]}
               </span>
             </div>
-            <span style={{              fontSize: 39, color: palette.text, fontWeight: 850, whiteSpace: 'nowrap'}}>
+            <span style={{fontSize: 50, color: palette.text, fontWeight: 850, whiteSpace: 'nowrap'}}>
               {formatTrendValue(quote.trend.value, quote.currency)}
             </span>
           </div>
@@ -404,12 +431,9 @@ const QuoteSlide = ({
         </div>
       </div>
 
-      <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, marginTop: 28}}>
-        <div style={{fontSize: 18, fontWeight: 700, color: palette.muted, letterSpacing: 0.8}}>
-          {source.toUpperCase()} <span style={{color: '#59777f'}}>·</span> ACTUALIZADO {formatDate(quote.updated_at)}
-        </div>
-        <div style={{fontSize: 18, color: accent, fontWeight: 800, whiteSpace: 'nowrap'}}>
-          {trendLabel[quote.trend.direction]} {formatTrendValue(quote.trend.value, quote.currency)}
+      <div style={{display: 'flex', justifyContent: 'flex-start', alignItems: 'center', gap: 16, marginTop: 28}}>
+        <div style={{fontSize: 24, fontWeight: 700, color: palette.muted, letterSpacing: 0.8}}>
+          {source.toUpperCase()}
         </div>
       </div>
     </div>
@@ -419,14 +443,11 @@ const QuoteSlide = ({
 const Recap = ({
   title,
   source,
-  generatedAt,
   quotes,
-}: Pick<QuoteVideoProps, 'title' | 'source' | 'generatedAt' | 'quotes'>) => {
+}: Pick<QuoteVideoProps, 'title' | 'source' | 'quotes'>) => {
   const frame = useCurrentFrame();
-  const entrance = interpolate(frame, [0, 18], [0, 1], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-  });
+  const {fps} = useVideoConfig();
+  const entrance = spring({frame, fps, config: {damping: 16, stiffness: 115}});
   const spacious = quotes.length <= 2;
 
   return (
@@ -439,7 +460,13 @@ const Recap = ({
       }}
     >
       <div style={{display: 'flex', flexDirection: 'column', height: '100%', opacity: entrance}}>
-        <div style={{textAlign: 'center'}}>
+        <div
+          style={{
+            textAlign: 'center',
+            opacity: entrance,
+            transform: `translateY(${(1 - entrance) * 72}px) scale(${0.9 + entrance * 0.1})`,
+          }}
+        >
           <div style={{fontSize: 24, color: palette.green, fontWeight: 900, letterSpacing: 5}}>
             RESUMEN FINAL
           </div>
@@ -467,9 +494,10 @@ const Recap = ({
             const sale = formatCurrency(quote.sale, quote.currency);
             const hasPurchase = quote.purchase !== 0;
             const purchase = hasPurchase ? formatCurrency(quote.purchase, quote.currency) : null;
-            const stagger = interpolate(frame, [index * 3, index * 3 + 18], [0, 1], {
-              extrapolateLeft: 'clamp',
-              extrapolateRight: 'clamp',
+            const stagger = spring({
+              frame: Math.max(0, frame - 6 - index * 5),
+              fps,
+              config: {damping: 15, stiffness: 125},
             });
             const arrow = quote.trend.direction === 'up' ? '↗' : quote.trend.direction === 'down' ? '↘' : '→';
 
@@ -477,8 +505,8 @@ const Recap = ({
               <div
                 key={quote.key}
                 style={{
-                  opacity: stagger,
-                  transform: `translateY(${(1 - stagger) * 24}px)`,
+                  opacity: Math.min(stagger, 1),
+                  transform: `translateY(${(1 - stagger) * 56}px) scale(${0.94 + stagger * 0.06})`,
                   minHeight: 0,
                   display: 'flex',
                   flexDirection: 'column',
@@ -497,7 +525,7 @@ const Recap = ({
                   </div>
                   <div
                     style={{
-                      fontSize: spacious ? 28 : 23,
+                      fontSize: spacious ? 34 : 28,
                       color: accent,
                       fontWeight: 900,
                       whiteSpace: 'nowrap',
@@ -541,25 +569,45 @@ const Recap = ({
                     </div>
                   )}
                 </div>
-                <div style={{fontSize: spacious ? 19 : 15, color: '#819ba0', marginTop: 8}}>
-                  {quote.subtitle.toUpperCase()} · ACTUALIZADO {formatDate(quote.updated_at)}
+                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 16, marginTop: 12}}>
+                  <div style={{fontSize: spacious ? 25 : 22, color: '#a6bdc2', fontWeight: 700}}>
+                    {quote.subtitle.toUpperCase()}
+                  </div>
+                  <div style={{textAlign: 'right', whiteSpace: 'nowrap'}}>
+                    <div style={{fontSize: spacious ? 20 : 18, color: palette.gold, fontWeight: 900, letterSpacing: 1}}>
+                      ACTUALIZADO
+                    </div>
+                    <div style={{fontSize: spacious ? 72 : 58, color: palette.text, fontWeight: 900, lineHeight: 1}}>
+                      {formatDateTime(quote.updated_at)}
+                    </div>
+                  </div>
                 </div>
               </div>
             );
           })}
         </div>
 
-        <div style={{textAlign: 'center', marginTop: 21, fontSize: 18, color: '#819ba0', letterSpacing: 0.8}}>
-          FUENTE: {source.toUpperCase()} · CORTE {formatDate(generatedAt)}
-          <span style={{color: '#58747c'}}> · </span>
-          VARIACIÓN REPORTADA, NO PROYECTADA
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            marginTop: 20,
+            gap: 12,
+            opacity: entrance,
+            transform: `translateY(${(1 - entrance) * 48}px) scale(${0.92 + entrance * 0.08})`,
+          }}
+        >
+          <div style={{textAlign: 'center', fontSize: 18, color: '#9ab0b5', letterSpacing: 0.8}}>
+            FUENTE: {source.toUpperCase()} · VARIACIÓN REPORTADA, NO PROYECTADA
+          </div>
         </div>
       </div>
     </AbsoluteFill>
   );
 };
 
-export const QuoteVideo = ({title, subtitle, source, generatedAt, quotes}: QuoteVideoProps) => {
+export const QuoteVideo = ({title, subtitle, source, quotes}: QuoteVideoProps) => {
   const frame = useCurrentFrame();
   const {durationInFrames} = useVideoConfig();
   const recapStart = INTRO_FRAMES + quotes.length * QUOTE_FRAMES;
@@ -590,7 +638,7 @@ export const QuoteVideo = ({title, subtitle, source, generatedAt, quotes}: Quote
       {frame < INTRO_FRAMES ? (
         <Intro title={title} subtitle={subtitle} source={source} />
       ) : frame >= recapStart ? (
-        <Recap title={title} source={source} generatedAt={generatedAt} quotes={quotes} />
+        <Recap title={title} source={source} quotes={quotes} />
       ) : (
         quotes.map((quote, index) => (
           <QuoteSlide
@@ -614,11 +662,6 @@ export const QuoteVideo = ({title, subtitle, source, generatedAt, quotes}: Quote
           }}
         />
       </div>
-      {frame < INTRO_FRAMES && (
-        <div style={{position: 'absolute', right: 85, bottom: 37, fontSize: 17, fontWeight: 800, color: '#829da3', letterSpacing: 1.4}}>
-          CORTE {formatDate(generatedAt)}
-        </div>
-      )}
     </AbsoluteFill>
   );
 };

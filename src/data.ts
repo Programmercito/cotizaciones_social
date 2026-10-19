@@ -144,6 +144,13 @@ export const formatDate = (value: string): string => {
   return `${match[3]}/${match[2]}/${match[1]}`;
 };
 
+export const formatDateTime = (value: string): string => {
+  const time = /[T ](\d{2}):(\d{2})/.exec(value);
+  return time
+    ? `${formatDate(value)} · ${time[1]}:${time[2]}`
+    : `${formatDate(value)} · hora no informada`;
+};
+
 export const trendLabel: Record<TrendDirection, string> = {
   up: 'SUBE',
   down: 'BAJA',

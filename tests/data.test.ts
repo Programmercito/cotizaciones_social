@@ -4,6 +4,7 @@ import {describe, expect, it} from 'vitest';
 import {
   formatCurrency,
   formatDate,
+  formatDateTime,
   formatTrendValue,
   parseQuoteSnapshot,
   splitQuotes,
@@ -53,9 +54,13 @@ describe('social.json quote data', () => {
 
   it('formats prices, signed changes, and source dates for Bolivian social graphics', () => {
     expect(formatCurrency(2650, 'USD')).toBe('2.650,00 USD');
+    expect(formatCurrency(13.36564, 'BOB')).toBe('13,37 BOB');
+    expect(formatCurrency(3.34313, 'BOB')).toBe('3,34 BOB');
     expect(formatTrendValue(-0.09, 'BOB')).toBe('−0,09 BOB');
     expect(formatTrendValue(0.16, 'BOB')).toBe('+0,16 BOB');
+    expect(formatTrendValue(-10, 'USD')).toBe('−10,00 USD');
     expect(formatDate('2026-10-18 21:29:41')).toBe('18/10/2026');
+    expect(formatDateTime('2026-10-18T21:29:41-04:00')).toBe('18/10/2026 · 21:29');
   });
 
   it('rejects a trend direction that conflicts with its signed value', () => {

@@ -28,7 +28,7 @@ Se guardan `usd-usdt.mp4` y `otros-activos.mp4` en `out\`. Para cambiar la carpe
 npm run render -- --input "C:\opt\osbo\cotiza\social.json" --out-dir "C:\ruta\de\salida"
 ```
 
-Se generan solo dos videos: **Dólar** (USD Oficial y USDT) y **Otras cotizaciones** (Euro, Oro, Plata y UFV). USD Referencial se omite. En cada activo, primero aparece la tendencia animada; después se muestran los importes de compra y venta en grande y centrados. Si el JSON no trae compra, se muestra únicamente venta. Ambos videos terminan con un resumen en pantalla de todas sus cotizaciones durante 10 segundos. La flecha y la variación usan `trend.direction` y `trend.value` tal como los entrega la fuente.
+Se generan solo dos videos: **Dólar** (USD Oficial y USDT) y **Otras cotizaciones** (Euro, Oro, Plata y UFV). USD Referencial se omite. En cada activo, primero aparece la tendencia animada; después se muestran los importes de compra y venta en grande y centrados. Si el JSON no trae compra, se muestra únicamente venta. Ambos videos incluyen un sello legible con la fecha y hora de `generated_at`, y terminan con un resumen en pantalla de todas sus cotizaciones durante 10 segundos. La flecha y la variación usan `trend.direction` y `trend.value` tal como los entrega la fuente.
 
 ## Desarrollo y validación
 
