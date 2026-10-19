@@ -1,0 +1,74 @@
+name: deploy
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cotizaciones-social-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      SERVER: ${{ secrets.SERVER }}
+      VPS_USER: ${{ secrets.USER }}
+      SSH_PRIVATE_KEY: ${{ secrets.KEY }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure SSH
+        run: |
+          set -euo pipefail
+          if [[ -z "$SERVER" || -z "$VPS_USER" || -z "$SSH_PRIVATE_KEY" ]]; then
+            echo "Configure the SERVER, USER, and KEY repository secrets." >&2
+            exit 1
+          fi
+          install -m 700 -d "$HOME/.ssh"
+          printf '%s\n' "$SSH_PRIVATE_KEY" > "$HOME/.ssh/deploy_key"
+          chmod 600 "$HOME/.ssh/deploy_key"
+          ssh-keyscan -H "$SERVER" >> "$HOME/.ssh/known_hosts"
+
+      - name: Archive source code
+        run: |
+          tar -czf "$RUNNER_TEMP/cotizaciones_social.tar.gz" \
+            --exclude=.git \
+            --exclude=node_modules \
+            --exclude=out \
+            --exclude=test-results \
+            -C "$GITHUB_WORKSPACE" .
+
+      - name: Copy source to VPS
+        run: |
+          scp -i "$HOME/.ssh/deploy_key" -o BatchMode=yes \
+            "$RUNNER_TEMP/cotizaciones_social.tar.gz" \
+            "$VPS_USER@$SERVER:/tmp/cotizaciones_social-${GITHUB_SHA}.tar.gz"
+
+      - name: Build, publish, and deploy image
+        run: |
+          ssh -i "$HOME/.ssh/deploy_key" -o BatchMode=yes \
+            "$VPS_USER@$SERVER" "bash -s -- ${GITHUB_SHA}" <<'REMOTE'
+          set -euo pipefail
+          release_dir="/opt/cotizaciones_social/source"
+          archive="/tmp/cotizaciones_social-${1}.tar.gz"
+
+          rm -rf "$release_dir"
+          mkdir -p "$release_dir"
+          tar -xzf "$archive" -C "$release_dir"
+          rm -f "$archive"
+
+          cd /opt/codes/bot-dockers
+          git pull --ff-only
+          docker build \
+            -t localhost:32000/cotizaciones_social:latest \
+            -f /opt/codes/bot-dockers/cotizaciones_social/docker/cotizaciones_social.dockerfile \
+            "$release_dir"
+          docker push localhost:32000/cotizaciones_social:latest
+          microk8s kubectl apply -f /opt/codes/bot-dockers/cotizaciones/kub/services.yaml
+          REMOTE

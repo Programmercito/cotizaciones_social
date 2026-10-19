@@ -30,6 +30,12 @@ npm run render -- --input "C:\opt\osbo\cotiza\social.json" --out-dir "C:\ruta\de
 
 Se generan solo dos videos: **Dólar** (USD Oficial y USDT) y **Otras cotizaciones** (Euro, Oro, Plata y UFV). USD Referencial se omite. En cada activo, primero aparece la tendencia animada; después se muestran los importes de compra y venta en grande y centrados. Si el JSON no trae compra, se muestra únicamente venta. Ambos videos incluyen un sello legible con la fecha y hora de `generated_at`, y terminan con un resumen en pantalla de todas sus cotizaciones durante 10 segundos. La flecha y la variación usan `trend.direction` y `trend.value` tal como los entrega la fuente.
 
+## Despliegue
+
+El workflow `.github/workflows/deploy.yaml` despliega al VPS al actualizar `main` o al iniciarlo manualmente. Configura los secretos `SERVER`, `USER` y `KEY` en este repositorio. El workflow copia el código al VPS, construye y publica `localhost:32000/cotizaciones_social:latest`, y aplica `cotizaciones/kub/services.yaml` desde `bot-dockers`.
+
+El único manifiesto `cotizaciones/kub/services.yaml` define el CronJob, que conserva la frecuencia de cotizaciones (cada 15 minutos) y ejecuta ambos procesos en orden: primero genera `/opt/osbo/cotiza/social.json`; cuando cotizaciones termina correctamente, el contenedor social genera los videos e imágenes en `/opt/osbo/cotiza`. El token y la configuración del CronJob se mantienen en un solo lugar.
+
 ## Desarrollo y validación
 
 ```powershell
