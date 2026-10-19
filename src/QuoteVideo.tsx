@@ -1,138 +1,569 @@
-import {
-  AbsoluteFill,
-  interpolate,
-  Sequence,
-  useCurrentFrame,
-} from 'remotion';
-import type {CSSProperties} from 'react';
-import {
-  formatCurrency,
-  formatDate,
-  formatTrendValue,
-  trendLabel,
-} from './data';
+import {AbsoluteFill, interpolate, useCurrentFrame, useVideoConfig} from 'remotion';
 import type {Quote, QuoteVideoProps} from './types';
+import {formatCurrency, formatDate, formatTrendValue, trendLabel} from './data';
 
-const colors = {
-  ink: '#071b24',
-  muted: '#9cb3bb',
-  white: '#f3faf8',
-  mint: '#62f2bd',
-  red: '#ff7a79',
-  card: 'rgba(14, 45, 53, 0.92)',
+export const INTRO_FRAMES = 45;
+export const QUOTE_FRAMES = 150;
+export const RECAP_FRAMES = 300;
+
+const palette = {
+  background: '#07171e',
+  surface: '#102b34',
+  text: '#f5fbfa',
+  muted: '#a6bdc2',
+  green: '#54f0ae',
+  red: '#ff777a',
+  gold: '#f0c777',
 };
 
-const Badge = ({quote}: {quote: Quote}) => {
-  const isUp = quote.trend.direction === 'up';
-  const isEqual = quote.trend.direction === 'equal';
-  const color = isEqual ? colors.muted : isUp ? colors.mint : colors.red;
-  const arrow = isEqual ? '•' : isUp ? '↗' : '↘';
+const accentFor = (quote: Quote) =>
+  quote.trend.direction === 'equal'
+    ? palette.gold
+    : quote.trend.direction === 'up'
+      ? palette.green
+      : palette.red;
+
+const Intro = ({title, subtitle, source}: Pick<QuoteVideoProps, 'title' | 'subtitle' | 'source'>) => {
+  const frame = useCurrentFrame();
+  const entrance = interpolate(frame, [0, 30], [0, 1], {
+    extrapolateLeft: 'clamp',
+    extrapolateRight: 'clamp',
+  });
 
   return (
     <div
       style={{
+        height: '100%',
         display: 'flex',
-        alignItems: 'center',
-        gap: 10,
-        border: `1px solid ${color}66`,
-        borderRadius: 999,
-        padding: '12px 18px',
-        backgroundColor: `${color}12`,
-        color,
-        fontSize: 21,
-        fontWeight: 800,
-        letterSpacing: 1.1,
-        whiteSpace: 'nowrap',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        padding: '100px 92px',
+        opacity: entrance,
+        transform: `translateY(${(1 - entrance) * 34}px)`,
       }}
     >
-      <span style={{fontSize: 28, lineHeight: 0}}>{arrow}</span>
-      {trendLabel[quote.trend.direction]}
-      <span style={{fontWeight: 700}}>
-        {formatTrendValue(quote.trend.value, quote.currency)}
-      </span>
+      <div style={{fontSize: 22, fontWeight: 800, letterSpacing: 6, color: palette.green}}>
+        BOLIVIA <span style={{color: '#76939b'}}>·</span> COTIZACIONES
+      </div>
+      <div
+        style={{
+          marginTop: 32,
+          maxWidth: 880,
+          fontSize: title.length > 16 ? 82 : 104,
+          fontWeight: 900,
+          lineHeight: 0.98,
+          letterSpacing: -3.5,
+          color: palette.text,
+          textWrap: 'balance',
+        }}
+      >
+        {title}
+      </div>
+      <div
+        style={{
+          marginTop: 28,
+          maxWidth: 750,
+          fontSize: 30,
+          lineHeight: 1.35,
+          color: palette.muted,
+        }}
+      >
+        {subtitle}
+      </div>
+      <div style={{display: 'flex', alignItems: 'center', gap: 14, marginTop: 56}}>
+        <div style={{width: 11, height: 11, borderRadius: '50%', background: palette.green}} />
+        <div style={{fontSize: 21, color: palette.text, letterSpacing: 1}}>
+          DATOS DE {source.toUpperCase()}
+        </div>
+      </div>
+      <div
+        style={{
+          width: 138,
+          height: 7,
+          marginTop: 76,
+          borderRadius: 10,
+          background: `linear-gradient(90deg, ${palette.green}, ${palette.gold})`,
+        }}
+      />
     </div>
   );
 };
 
-const QuoteCard = ({quote, index}: {quote: Quote; index: number}) => {
-  const frame = useCurrentFrame();
-  const start = index * 9 + 12;
-  const progress = interpolate(frame, [start, start + 28], [0, 1], {
+const Tendency = ({quote, frame}: {quote: Quote; frame: number}) => {
+  const accent = accentFor(quote);
+  const reveal = interpolate(frame, [0, 32], [0, 1], {
     extrapolateLeft: 'clamp',
     extrapolateRight: 'clamp',
   });
-  const style: CSSProperties = {
-    opacity: progress,
-    transform: `translate3d(0, ${(1 - progress) * 48}px, 0)`,
-  };
-  const purchase = quote.purchase === 0 ? 'No disponible' : formatCurrency(quote.purchase, quote.currency);
+  const isUp = quote.trend.direction === 'up';
+  const isDown = quote.trend.direction === 'down';
+  const arrow = isUp ? '↗' : isDown ? '↘' : '→';
+  const arrowY = interpolate(frame, [0, 38], [isUp ? 44 : isDown ? -44 : 0, 0], {
+    extrapolateLeft: 'clamp',
+    extrapolateRight: 'clamp',
+  });
+  const linePath = isUp
+    ? 'M 5 112 C 95 112, 128 33, 250 25'
+    : isDown
+      ? 'M 5 25 C 95 25, 128 112, 250 112'
+      : 'M 5 68 C 100 68, 150 68, 250 68';
+  const dashOffset = interpolate(frame, [0, 40], [290, 0], {
+    extrapolateLeft: 'clamp',
+    extrapolateRight: 'clamp',
+  });
 
   return (
     <div
       style={{
-        ...style,
-        flex: '1 1 0',
-        minHeight: 0,
-        padding: '25px 30px',
-        borderRadius: 30,
-        background: `linear-gradient(120deg, ${colors.card}, rgba(9, 33, 42, 0.94))`,
-        border: '1px solid rgba(148, 206, 193, 0.22)',
-        boxShadow: '0 18px 50px rgba(0, 0, 0, 0.2)',
+        width: '100%',
         display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'space-between',
-        overflow: 'hidden',
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: 66,
+        opacity: reveal,
+        transform: `translateY(${(1 - reveal) * 34}px)`,
       }}
     >
-      <div style={{display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16}}>
-        <div>
-          <div style={{fontSize: 37, fontWeight: 850, letterSpacing: -1.4, color: colors.white}}>
-            {quote.label}
-          </div>
-          <div style={{fontSize: 19, marginTop: 3, color: colors.muted, letterSpacing: 1}}>
-            {quote.subtitle.toUpperCase()}
-          </div>
+      <div>
+        <div style={{fontSize: 24, fontWeight: 800, letterSpacing: 5, color: palette.muted}}>
+          TENDENCIA REPORTADA
         </div>
-        <Badge quote={quote} />
-      </div>
-
-      <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginTop: 19}}>
-        <div>
-          <div style={{fontSize: 17, color: colors.muted, marginBottom: 4}}>VENTA</div>
-          <div style={{fontSize: 39, fontWeight: 800, letterSpacing: -1.2, color: colors.white}}>
-            {formatCurrency(quote.sale, quote.currency)}
-          </div>
+        <div
+          style={{
+            marginTop: 14,
+            fontSize: 112,
+            fontWeight: 900,
+            letterSpacing: -4,
+            lineHeight: 0.98,
+            color: accent,
+          }}
+        >
+          {trendLabel[quote.trend.direction]}
         </div>
-        <div>
-          <div style={{fontSize: 17, color: colors.muted, marginBottom: 4}}>COMPRA</div>
-          <div
-            style={{
-              fontSize: purchase === 'No disponible' ? 27 : 39,
-              fontWeight: 800,
-              letterSpacing: -1.2,
-              color: purchase === 'No disponible' ? colors.muted : colors.white,
-            }}
-          >
-            {purchase}
-          </div>
+        <div style={{marginTop: 18, fontSize: 60, fontWeight: 850, letterSpacing: -1.8, color: palette.text}}>
+          {formatTrendValue(quote.trend.value, quote.currency)}
         </div>
       </div>
 
-      <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 13}}>
-        <div style={{fontSize: 17, color: colors.muted}}>
-          ACTUALIZADO {formatDate(quote.updated_at)}
+      <div
+        style={{
+          width: 260,
+          height: 260,
+          flex: '0 0 260px',
+          borderRadius: '50%',
+          display: 'grid',
+          placeItems: 'center',
+          background: `radial-gradient(circle at 40% 35%, ${accent}25, ${accent}08 70%)`,
+          border: `1px solid ${accent}55`,
+          boxShadow: `0 0 80px ${accent}20`,
+          overflow: 'hidden',
+          position: 'relative',
+        }}
+      >
+        <svg width="218" height="150" viewBox="0 0 260 140" aria-hidden="true">
+          <path
+            d={linePath}
+            fill="none"
+            stroke={`${accent}55`}
+            strokeWidth="5"
+            strokeLinecap="round"
+            strokeDasharray="290"
+            strokeDashoffset={dashOffset}
+          />
+          <path
+            d={isUp ? 'M 218 13 L 250 25 L 230 49' : isDown ? 'M 218 124 L 250 112 L 230 88' : 'M 228 54 L 250 68 L 228 82'}
+            fill="none"
+            stroke={accent}
+            strokeWidth="7"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            opacity={reveal}
+          />
+        </svg>
+        <div
+          style={{
+            position: 'absolute',
+            fontSize: 91,
+            fontWeight: 800,
+            color: accent,
+            transform: `translate(${(1 - reveal) * -24}px, ${arrowY}px)`,
+            opacity: reveal,
+          }}
+        >
+          {arrow}
         </div>
-        {quote.purchase === 0 && (
-          <div style={{fontSize: 15, color: colors.muted}}>Compra no informada</div>
-        )}
       </div>
     </div>
+  );
+};
+
+const PriceRow = ({
+  label,
+  value,
+  currency,
+  color,
+  progress,
+}: {
+  label: string;
+  value: string;
+  currency: Quote['currency'];
+  color: string;
+  progress: number;
+}) => (
+  <div
+    style={{
+      minHeight: 225,
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 10,
+      padding: '23px 34px',
+      borderRadius: 28,
+      background: 'linear-gradient(110deg, rgba(16, 43, 52, .98), rgba(10, 32, 41, .96))',
+      border: '1px solid rgba(152, 198, 192, .18)',
+      borderLeft: `8px solid ${color}`,
+      opacity: progress,
+      transform: `translateY(${(1 - progress) * 54}px) scale(${0.97 + progress * 0.03})`,
+    }}
+  >
+    <div style={{textAlign: 'center'}}>
+      <div style={{fontSize: 21, fontWeight: 800, letterSpacing: 4, color: palette.muted}}>
+        {label}
+      </div>
+      <div style={{marginTop: 7, fontSize: 19, fontWeight: 700, color}}>
+        COTIZACIÓN EN {currency}
+      </div>
+    </div>
+    <div
+      style={{
+        fontSize: 124,
+        fontWeight: 900,
+        letterSpacing: -3,
+        color: palette.text,
+        whiteSpace: 'nowrap',
+        lineHeight: 1,
+      }}
+    >
+      {value}
+    </div>
+  </div>
+);
+
+const QuoteSlide = ({
+  quote,
+  index,
+  count,
+  frame,
+  title,
+  source,
+}: {
+  quote: Quote;
+  index: number;
+  count: number;
+  frame: number;
+  title: string;
+  source: string;
+}) => {
+  const localFrame = frame - INTRO_FRAMES - index * QUOTE_FRAMES;
+  const transition = interpolate(localFrame, [0, 13], [0, 1], {
+    extrapolateLeft: 'clamp',
+    extrapolateRight: 'clamp',
+  });
+  const tendencyOpacity = interpolate(localFrame, [0, 12, 46, 63], [0, 1, 1, 0], {
+    extrapolateLeft: 'clamp',
+    extrapolateRight: 'clamp',
+  });
+  const priceOpacity = interpolate(localFrame, [55, 73], [0, 1], {
+    extrapolateLeft: 'clamp',
+    extrapolateRight: 'clamp',
+  });
+  const priceLift = interpolate(localFrame, [55, 73], [50, 0], {
+    extrapolateLeft: 'clamp',
+    extrapolateRight: 'clamp',
+  });
+  const endFade = interpolate(localFrame, [QUOTE_FRAMES - 12, QUOTE_FRAMES], [1, 0], {
+    extrapolateLeft: 'clamp',
+    extrapolateRight: 'clamp',
+  });
+  const accent = accentFor(quote);
+  const hasPurchase = quote.purchase !== 0;
+
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        inset: 0,
+        padding: '74px 86px 76px',
+        display: 'flex',
+        flexDirection: 'column',
+        opacity: transition * endFade,
+        background: `radial-gradient(ellipse at 93% 39%, ${accent}12, transparent 39%)`,
+      }}
+    >
+      <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 22}}>
+        <div>
+          <div style={{fontSize: 18, fontWeight: 800, letterSpacing: 5, color: palette.green}}>
+            BOLIVIA <span style={{color: '#76939b'}}>·</span> {title.toUpperCase()}
+          </div>
+          <div style={{marginTop: 15, fontSize: title.length > 16 ? 57 : 67, fontWeight: 900, letterSpacing: -2.4, color: palette.text}}>
+            {title}
+          </div>
+        </div>
+        <div
+          style={{
+            padding: '13px 18px',
+            borderRadius: 999,
+            border: '1px solid rgba(166, 189, 194, .24)',
+            color: palette.muted,
+            fontSize: 20,
+            fontWeight: 800,
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {String(index + 1).padStart(2, '0')} / {String(count).padStart(2, '0')}
+        </div>
+      </div>
+
+      <div style={{marginTop: 54}}>
+        <div style={{fontSize: 78, fontWeight: 900, letterSpacing: -3, lineHeight: 1, color: palette.text}}>
+          {quote.label}
+        </div>
+        <div style={{fontSize: 25, marginTop: 11, color: palette.muted, letterSpacing: 1.4}}>
+          {quote.subtitle.toUpperCase()}
+        </div>
+      </div>
+
+      <div style={{position: 'relative', flex: 1, minHeight: 690, marginTop: 20}}>
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            display: 'grid',
+            placeItems: 'center',
+            opacity: tendencyOpacity,
+            transform: `translateY(-110px) scale(${0.96 + tendencyOpacity * 0.04})`,
+          }}
+        >
+          <Tendency quote={quote} frame={localFrame} />
+        </div>
+        <div
+          style={{
+            position: 'absolute',
+            top: '40%',
+            left: 0,
+            right: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 16,
+            opacity: priceOpacity,
+            transform: `translateY(calc(-50% + ${priceLift}px))`,
+          }}
+        >
+          <div
+            style={{
+              minHeight: 88,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 20,
+              padding: '17px 30px',
+              borderRadius: 24,
+              background: `${accent}13`,
+              border: `1px solid ${accent}55`,
+            }}
+          >
+            <div style={{display: 'flex', alignItems: 'center', gap: 18}}>
+              <span style={{fontSize: 45, lineHeight: 1, color: accent, fontWeight: 900}}>
+                {quote.trend.direction === 'up' ? '↗' : quote.trend.direction === 'down' ? '↘' : '→'}
+              </span>
+              <span style={{fontSize: 23, fontWeight: 900, letterSpacing: 2, color: accent}}>
+                {trendLabel[quote.trend.direction]}
+              </span>
+            </div>
+            <span style={{              fontSize: 39, color: palette.text, fontWeight: 850, whiteSpace: 'nowrap'}}>
+              {formatTrendValue(quote.trend.value, quote.currency)}
+            </span>
+          </div>
+          <PriceRow
+            label="VENTA"
+            value={formatCurrency(quote.sale, quote.currency)}
+            currency={quote.currency}
+            color={palette.gold}
+            progress={priceOpacity}
+          />
+          {hasPurchase && (
+            <PriceRow
+              label="COMPRA"
+              value={formatCurrency(quote.purchase, quote.currency)}
+              currency={quote.currency}
+              color={palette.green}
+              progress={priceOpacity}
+            />
+          )}
+        </div>
+      </div>
+
+      <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, marginTop: 28}}>
+        <div style={{fontSize: 18, fontWeight: 700, color: palette.muted, letterSpacing: 0.8}}>
+          {source.toUpperCase()} <span style={{color: '#59777f'}}>·</span> ACTUALIZADO {formatDate(quote.updated_at)}
+        </div>
+        <div style={{fontSize: 18, color: accent, fontWeight: 800, whiteSpace: 'nowrap'}}>
+          {trendLabel[quote.trend.direction]} {formatTrendValue(quote.trend.value, quote.currency)}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const Recap = ({
+  title,
+  source,
+  generatedAt,
+  quotes,
+}: Pick<QuoteVideoProps, 'title' | 'source' | 'generatedAt' | 'quotes'>) => {
+  const frame = useCurrentFrame();
+  const entrance = interpolate(frame, [0, 18], [0, 1], {
+    extrapolateLeft: 'clamp',
+    extrapolateRight: 'clamp',
+  });
+  const spacious = quotes.length <= 2;
+
+  return (
+    <AbsoluteFill
+      style={{
+        padding: '70px 76px 77px',
+        background: `radial-gradient(ellipse at 50% 0%, rgba(42, 132, 116, .2), transparent 43%), ${palette.background}`,
+        color: palette.text,
+        fontFamily: 'Arial, Helvetica, sans-serif',
+      }}
+    >
+      <div style={{display: 'flex', flexDirection: 'column', height: '100%', opacity: entrance}}>
+        <div style={{textAlign: 'center'}}>
+          <div style={{fontSize: 24, color: palette.green, fontWeight: 900, letterSpacing: 5}}>
+            RESUMEN FINAL
+          </div>
+          <div style={{fontSize: 84, color: palette.text, fontWeight: 900, letterSpacing: -3.2, marginTop: 12, lineHeight: 1}}>
+            {title.toUpperCase()}
+          </div>
+          <div style={{fontSize: 25, color: palette.muted, marginTop: 13}}>
+            TODAS LAS COTIZACIONES <span style={{color: '#65838a'}}>·</span> VENTA · COMPRA · VARIACIÓN
+          </div>
+        </div>
+
+        <div
+          style={{
+            flex: 1,
+            minHeight: 0,
+            marginTop: 32,
+            display: 'grid',
+            gridTemplateColumns: '1fr',
+            gridTemplateRows: `repeat(${quotes.length}, minmax(0, 1fr))`,
+            gap: spacious ? 22 : 13,
+          }}
+        >
+          {quotes.map((quote, index) => {
+            const accent = accentFor(quote);
+            const sale = formatCurrency(quote.sale, quote.currency);
+            const hasPurchase = quote.purchase !== 0;
+            const purchase = hasPurchase ? formatCurrency(quote.purchase, quote.currency) : null;
+            const stagger = interpolate(frame, [index * 3, index * 3 + 18], [0, 1], {
+              extrapolateLeft: 'clamp',
+              extrapolateRight: 'clamp',
+            });
+            const arrow = quote.trend.direction === 'up' ? '↗' : quote.trend.direction === 'down' ? '↘' : '→';
+
+            return (
+              <div
+                key={quote.key}
+                style={{
+                  opacity: stagger,
+                  transform: `translateY(${(1 - stagger) * 24}px)`,
+                  minHeight: 0,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  padding: spacious ? '31px 38px' : '16px 26px',
+                  borderRadius: 28,
+                  background: 'linear-gradient(125deg, rgba(17, 52, 60, .98), rgba(9, 31, 40, .98))',
+                  border: `1px solid ${accent}42`,
+                  borderLeft: `7px solid ${accent}`,
+                  boxShadow: '0 14px 36px rgba(0, 0, 0, .18)',
+                }}
+              >
+                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 14}}>
+                  <div style={{fontSize: spacious ? 68 : 46, fontWeight: 900, letterSpacing: -1.5, color: palette.text}}>
+                    {quote.label}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: spacious ? 28 : 23,
+                      color: accent,
+                      fontWeight: 900,
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {arrow} {trendLabel[quote.trend.direction]} {formatTrendValue(quote.trend.value, quote.currency)}
+                  </div>
+                </div>
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: hasPurchase && !spacious ? '1fr 1fr' : '1fr',
+                    gap: 18,
+                    marginTop: 12,
+                  }}
+                >
+                  <div style={{textAlign: 'center'}}>
+                    <div style={{fontSize: spacious ? 23 : 18, color: palette.muted, fontWeight: 800, letterSpacing: 2}}>
+                      VENTA
+                    </div>
+                    <div style={{fontSize: spacious ? 104 : hasPurchase ? 68 : 80, color: palette.text, fontWeight: 900, letterSpacing: -1.5, whiteSpace: 'nowrap'}}>
+                      {sale}
+                    </div>
+                  </div>
+                  {hasPurchase && (
+                    <div style={{textAlign: 'center'}}>
+                      <div style={{fontSize: spacious ? 23 : 18, color: palette.muted, fontWeight: 800, letterSpacing: 2}}>
+                        COMPRA
+                      </div>
+                      <div
+                        style={{
+                          fontSize: spacious ? 104 : 68,
+                          color: palette.text,
+                          fontWeight: 900,
+                          letterSpacing: -1.5,
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {purchase}
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <div style={{fontSize: spacious ? 19 : 15, color: '#819ba0', marginTop: 8}}>
+                  {quote.subtitle.toUpperCase()} · ACTUALIZADO {formatDate(quote.updated_at)}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <div style={{textAlign: 'center', marginTop: 21, fontSize: 18, color: '#819ba0', letterSpacing: 0.8}}>
+          FUENTE: {source.toUpperCase()} · CORTE {formatDate(generatedAt)}
+          <span style={{color: '#58747c'}}> · </span>
+          VARIACIÓN REPORTADA, NO PROYECTADA
+        </div>
+      </div>
+    </AbsoluteFill>
   );
 };
 
 export const QuoteVideo = ({title, subtitle, source, generatedAt, quotes}: QuoteVideoProps) => {
   const frame = useCurrentFrame();
-  const titleProgress = interpolate(frame, [0, 24], [0, 1], {
+  const {durationInFrames} = useVideoConfig();
+  const recapStart = INTRO_FRAMES + quotes.length * QUOTE_FRAMES;
+  const progress = interpolate(frame, [0, durationInFrames], [0, 100], {
     extrapolateLeft: 'clamp',
     extrapolateRight: 'clamp',
   });
@@ -140,79 +571,54 @@ export const QuoteVideo = ({title, subtitle, source, generatedAt, quotes}: Quote
   return (
     <AbsoluteFill
       style={{
-        background: `radial-gradient(ellipse at 92% 3%, rgba(34, 111, 102, .46), transparent 37%), radial-gradient(ellipse at 0% 98%, rgba(14, 91, 96, .34), transparent 34%), linear-gradient(145deg, #071920 0%, ${colors.ink} 55%, #092631 100%)`,
-        color: colors.white,
+        background: `radial-gradient(ellipse at 100% 0%, rgba(35, 112, 100, .26), transparent 34%), radial-gradient(ellipse at 0% 100%, rgba(29, 87, 107, .2), transparent 36%), ${palette.background}`,
+        color: palette.text,
         fontFamily: 'Arial, Helvetica, sans-serif',
       }}
     >
-      <div style={{position: 'absolute', inset: 0, opacity: 0.1}}>
+      <div style={{position: 'absolute', inset: 0, opacity: 0.075}}>
         <svg width="100%" height="100%" viewBox="0 0 1080 1920" preserveAspectRatio="none">
           <defs>
-            <pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse">
-              <path d="M 48 0 L 0 0 0 48" fill="none" stroke="#9de5ce" strokeWidth="1" />
+            <pattern id="grid" width="56" height="56" patternUnits="userSpaceOnUse">
+              <path d="M 56 0 L 0 0 0 56" fill="none" stroke="#a2d5c9" strokeWidth="1" />
             </pattern>
           </defs>
           <rect width="100%" height="100%" fill="url(#grid)" />
         </svg>
       </div>
 
-      <div style={{position: 'relative', display: 'flex', flexDirection: 'column', height: '100%', padding: '66px 58px 48px'}}>
-        <Sequence from={0}>
-          <div
-            style={{
-              opacity: titleProgress,
-              transform: `translateY(${(1 - titleProgress) * 24}px)`,
-            }}
-          >
-            <div style={{fontSize: 17, color: colors.mint, fontWeight: 800, letterSpacing: 4}}>
-              BOLIVIA <span style={{color: '#63828a'}}>/</span> COTIZACIONES
-            </div>
-            <div
-              style={{
-                fontSize: 78,
-                fontWeight: 900,
-                letterSpacing: -4,
-                lineHeight: 0.99,
-                marginTop: 22,
-                maxWidth: 950,
-              }}
-            >
-              {title}
-            </div>
-            <div style={{fontSize: 25, color: colors.muted, marginTop: 17, lineHeight: 1.3}}>
-              {subtitle}
-            </div>
-            <div style={{display: 'flex', gap: 12, alignItems: 'center', marginTop: 20}}>
-              <div style={{width: 9, height: 9, borderRadius: 9, backgroundColor: colors.mint}} />
-              <div style={{fontSize: 17, color: '#c2d3d5'}}>
-                {source} <span style={{color: '#69868b'}}>•</span> CORTE {formatDate(generatedAt)}
-              </div>
-            </div>
-          </div>
-        </Sequence>
+      {frame < INTRO_FRAMES ? (
+        <Intro title={title} subtitle={subtitle} source={source} />
+      ) : frame >= recapStart ? (
+        <Recap title={title} source={source} generatedAt={generatedAt} quotes={quotes} />
+      ) : (
+        quotes.map((quote, index) => (
+          <QuoteSlide
+            key={quote.key}
+            quote={quote}
+            index={index}
+            count={quotes.length}
+            frame={frame}
+            title={title}
+            source={source}
+          />
+        ))
+      )}
 
-        <div style={{display: 'flex', flexDirection: 'column', flex: 1, gap: 15, marginTop: 31, minHeight: 0}}>
-          {quotes.map((quote, index) => (
-            <QuoteCard key={quote.key} quote={quote} index={index} />
-          ))}
-        </div>
-
+      <div style={{position: 'absolute', left: 0, right: 0, bottom: 0, height: 8, background: 'rgba(166, 189, 194, .12)'}}>
         <div
           style={{
-            marginTop: 24,
-            paddingTop: 17,
-            borderTop: '1px solid rgba(163, 199, 195, .2)',
-            color: '#91aaae',
-            fontSize: 16,
-            display: 'flex',
-            justifyContent: 'space-between',
-            gap: 20,
+            width: `${progress}%`,
+            height: '100%',
+            background: `linear-gradient(90deg, ${palette.green}, ${palette.gold})`,
           }}
-        >
-          <span>Tendencia reportada por la fuente; no es una proyección.</span>
-          <span style={{color: '#b5c8ca', fontWeight: 700}}>BOB · USD</span>
-        </div>
+        />
       </div>
+      {frame < INTRO_FRAMES && (
+        <div style={{position: 'absolute', right: 85, bottom: 37, fontSize: 17, fontWeight: 800, color: '#829da3', letterSpacing: 1.4}}>
+          CORTE {formatDate(generatedAt)}
+        </div>
+      )}
     </AbsoluteFill>
   );
 };

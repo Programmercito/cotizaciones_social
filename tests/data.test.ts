@@ -34,11 +34,10 @@ describe('social.json quote data', () => {
     ]);
   });
 
-  it('keeps the five remaining assets and does not turn missing purchase prices into zero quotes', () => {
+  it('excludes USD Referencial and keeps the four requested assets', () => {
     const {other} = splitQuotes(snapshot);
 
     expect(other.map(({key}) => key)).toEqual([
-      'usd_referencial',
       'euro',
       'oro',
       'plata',
@@ -49,6 +48,7 @@ describe('social.json quote data', () => {
       'plata',
       'ufv',
     ]);
+    expect(other.some(({key}) => key === 'usd_referencial')).toBe(false);
   });
 
   it('formats prices, signed changes, and source dates for Bolivian social graphics', () => {

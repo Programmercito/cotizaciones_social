@@ -1,34 +1,39 @@
 import {Composition} from 'remotion';
-import {QuoteVideo} from './QuoteVideo';
+import {INTRO_FRAMES, QUOTE_FRAMES, RECAP_FRAMES, QuoteVideo} from './QuoteVideo';
 import type {QuoteVideoProps} from './types';
 
 const defaultProps: QuoteVideoProps = {
-  title: 'Cotizaciones',
+  title: 'Dólar',
   subtitle: '',
   source: '',
   generatedAt: '2026-01-01',
   quotes: [],
 };
 
+const durationFor = (quotes: QuoteVideoProps['quotes']) =>
+  INTRO_FRAMES + quotes.length * QUOTE_FRAMES + RECAP_FRAMES;
+
 export const RemotionRoot = () => (
   <>
     <Composition
       id="usd-usdt"
       component={QuoteVideo}
-      durationInFrames={390}
+      durationInFrames={durationFor(defaultProps.quotes)}
       fps={30}
       width={1080}
       height={1920}
-      defaultProps={{...defaultProps, title: 'USD + USDT'}}
+      defaultProps={{...defaultProps, title: 'Dólar'}}
+      calculateMetadata={({props}) => ({durationInFrames: durationFor(props.quotes)})}
     />
     <Composition
       id="otros-activos"
       component={QuoteVideo}
-      durationInFrames={390}
+      durationInFrames={durationFor(defaultProps.quotes)}
       fps={30}
       width={1080}
       height={1920}
       defaultProps={{...defaultProps, title: 'Otras cotizaciones'}}
+      calculateMetadata={({props}) => ({durationInFrames: durationFor(props.quotes)})}
     />
   </>
 );

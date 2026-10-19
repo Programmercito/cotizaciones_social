@@ -78,15 +78,15 @@ const main = async () => {
 
   const data: QuoteVideoProps[] = [
     {
-      title: 'USD + USDT',
-      subtitle: 'Dólar oficial y mercado cripto, lado a lado.',
+      title: 'Dólar',
+      subtitle: 'USD Oficial + USDT · cotizaciones del dólar.',
       source: snapshot.source,
       generatedAt: snapshot.generated_at,
       quotes: primary,
     },
     {
       title: 'Otras cotizaciones',
-      subtitle: 'Referencial, euro, metales y UFV.',
+      subtitle: 'Euro · Oro · Plata · UFV.',
       source: snapshot.source,
       generatedAt: snapshot.generated_at,
       quotes: other,

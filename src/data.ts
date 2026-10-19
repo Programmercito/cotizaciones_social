@@ -105,6 +105,7 @@ export const parseQuoteSnapshot = (value: unknown): QuoteSnapshot => {
 
 export const splitQuotes = (snapshot: QuoteSnapshot) => {
   const primaryKeys = ['usd_oficial', 'usdt'];
+  const excludedKeys = [...primaryKeys, 'usd_referencial'];
   const primary = primaryKeys
     .map((key) => snapshot.quotes.find((quote) => quote.key === key))
     .filter((quote): quote is Quote => quote !== undefined);
@@ -114,7 +115,7 @@ export const splitQuotes = (snapshot: QuoteSnapshot) => {
 
   return {
     primary,
-    other: snapshot.quotes.filter((quote) => !primaryKeys.includes(quote.key)),
+    other: snapshot.quotes.filter((quote) => !excludedKeys.includes(quote.key)),
   };
 };
 
