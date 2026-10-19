@@ -111,6 +111,7 @@ const main = async () => {
       source: snapshot.source,
       generatedAt: snapshot.generated_at,
       quotes: other,
+      hideRedundantPurchase: true,
     },
   ];
 

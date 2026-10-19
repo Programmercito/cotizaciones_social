@@ -23,6 +23,12 @@ const accentFor = (quote: Quote) =>
       ? palette.green
       : palette.red;
 
+const shouldShowPurchase = (quote: Quote, hideRedundantPurchase: boolean) =>
+  quote.purchase !== 0 && (!hideRedundantPurchase || quote.purchase !== quote.sale);
+
+const amountFontSize = (value: string, spacious: boolean) =>
+  spacious ? 104 : value.length > 11 ? 50 : value.length > 9 ? 58 : 68;
+
 const QuoteTimestamp = ({timestamp, compact = false}: {timestamp: string; compact?: boolean}) => (
   <div
     style={{
@@ -236,6 +242,8 @@ const PriceRow = ({
 }) => (
   <div
     style={{
+      boxSizing: 'border-box',
+      width: '100%',
       minHeight: 225,
       display: 'flex',
       flexDirection: 'column',
@@ -261,7 +269,7 @@ const PriceRow = ({
     </div>
     <div
       style={{
-        fontSize: 124,
+        fontSize: value.length > 11 ? 92 : value.length > 9 ? 108 : 124,
         fontWeight: 900,
         letterSpacing: -3,
         color: palette.text,
@@ -281,6 +289,7 @@ const QuoteSlide = ({
   frame,
   title,
   source,
+  hideRedundantPurchase = false,
 }: {
   quote: Quote;
   index: number;
@@ -288,6 +297,7 @@ const QuoteSlide = ({
   frame: number;
   title: string;
   source: string;
+  hideRedundantPurchase?: boolean;
 }) => {
   const localFrame = frame - INTRO_FRAMES - index * QUOTE_FRAMES;
   const transition = interpolate(localFrame, [0, 13], [0, 1], {
@@ -311,7 +321,7 @@ const QuoteSlide = ({
     extrapolateRight: 'clamp',
   });
   const accent = accentFor(quote);
-  const hasPurchase = quote.purchase !== 0;
+  const hasPurchase = shouldShowPurchase(quote, hideRedundantPurchase);
 
   return (
     <div
@@ -445,7 +455,8 @@ const Recap = ({
   source,
   quotes,
   frame,
-}: Pick<QuoteVideoProps, 'title' | 'source' | 'quotes'> & {frame: number}) => {
+  hideRedundantPurchase = false,
+}: Pick<QuoteVideoProps, 'title' | 'source' | 'quotes' | 'hideRedundantPurchase'> & {frame: number}) => {
   const {fps} = useVideoConfig();
   const entrance = spring({frame, fps, config: {damping: 16, stiffness: 115}});
   const spacious = quotes.length <= 2;
@@ -482,17 +493,19 @@ const Recap = ({
           style={{
             flex: 1,
             minHeight: 0,
+            width: '100%',
             marginTop: 32,
             display: 'grid',
             gridTemplateColumns: '1fr',
             gridTemplateRows: `repeat(${quotes.length}, minmax(0, 1fr))`,
             gap: spacious ? 22 : 13,
+            justifyItems: 'center',
           }}
         >
           {quotes.map((quote, index) => {
             const accent = accentFor(quote);
             const sale = formatCurrency(quote.sale, quote.currency);
-            const hasPurchase = quote.purchase !== 0;
+            const hasPurchase = shouldShowPurchase(quote, hideRedundantPurchase);
             const purchase = hasPurchase ? formatCurrency(quote.purchase, quote.currency) : null;
             const stagger = spring({
               frame: Math.max(0, frame - 6 - index * 5),
@@ -508,6 +521,8 @@ const Recap = ({
                   opacity: Math.min(stagger, 1),
                   transform: `translateY(${(1 - stagger) * 56}px) scale(${0.94 + stagger * 0.06})`,
                   minHeight: 0,
+                  width: '100%',
+                  boxSizing: 'border-box',
                   display: 'flex',
                   flexDirection: 'column',
                   justifyContent: 'space-between',
@@ -519,16 +534,19 @@ const Recap = ({
                   boxShadow: '0 14px 36px rgba(0, 0, 0, .18)',
                 }}
               >
-                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 14}}>
-                  <div style={{fontSize: spacious ? 68 : 46, fontWeight: 900, letterSpacing: -1.5, color: palette.text}}>
+                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 14, minWidth: 0}}>
+                  <div style={{minWidth: 0, fontSize: spacious ? 68 : 46, fontWeight: 900, letterSpacing: -1.5, color: palette.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>
                     {quote.label}
                   </div>
                   <div
                     style={{
+                      minWidth: 0,
                       fontSize: spacious ? 34 : 28,
                       color: accent,
                       fontWeight: 900,
                       whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
                     }}
                   >
                     {arrow} {trendLabel[quote.trend.direction]} {formatTrendValue(quote.trend.value, quote.currency)}
@@ -540,24 +558,25 @@ const Recap = ({
                     gridTemplateColumns: hasPurchase && !spacious ? '1fr 1fr' : '1fr',
                     gap: 18,
                     marginTop: 12,
+                    minWidth: 0,
                   }}
                 >
-                  <div style={{textAlign: 'center'}}>
+                  <div style={{minWidth: 0, overflow: 'hidden', textAlign: 'center'}}>
                     <div style={{fontSize: spacious ? 23 : 18, color: palette.muted, fontWeight: 800, letterSpacing: 2}}>
                       VENTA
                     </div>
-                    <div style={{fontSize: spacious ? 104 : hasPurchase ? 68 : 80, color: palette.text, fontWeight: 900, letterSpacing: -1.5, whiteSpace: 'nowrap'}}>
+                    <div style={{fontSize: hasPurchase ? amountFontSize(sale, spacious) : spacious ? 104 : 80, color: palette.text, fontWeight: 900, letterSpacing: -1.5, whiteSpace: 'nowrap'}}>
                       {sale}
                     </div>
                   </div>
                   {hasPurchase && (
-                    <div style={{textAlign: 'center'}}>
+                    <div style={{minWidth: 0, overflow: 'hidden', textAlign: 'center'}}>
                       <div style={{fontSize: spacious ? 23 : 18, color: palette.muted, fontWeight: 800, letterSpacing: 2}}>
                         COMPRA
                       </div>
                       <div
                         style={{
-                          fontSize: spacious ? 104 : 68,
+                          fontSize: amountFontSize(purchase ?? '', spacious),
                           color: palette.text,
                           fontWeight: 900,
                           letterSpacing: -1.5,
@@ -607,7 +626,7 @@ const Recap = ({
   );
 };
 
-export const QuoteVideo = ({title, subtitle, source, quotes}: QuoteVideoProps) => {
+export const QuoteVideo = ({title, subtitle, source, quotes, hideRedundantPurchase = false}: QuoteVideoProps) => {
   const frame = useCurrentFrame();
   const {durationInFrames} = useVideoConfig();
   const recapStart = INTRO_FRAMES + quotes.length * QUOTE_FRAMES;
@@ -638,7 +657,13 @@ export const QuoteVideo = ({title, subtitle, source, quotes}: QuoteVideoProps) =
       {frame < INTRO_FRAMES ? (
         <Intro title={title} subtitle={subtitle} source={source} />
       ) : frame >= recapStart ? (
-        <Recap title={title} source={source} quotes={quotes} frame={frame - recapStart} />
+        <Recap
+          title={title}
+          source={source}
+          quotes={quotes}
+          frame={frame - recapStart}
+          hideRedundantPurchase={hideRedundantPurchase}
+        />
       ) : (
         quotes.map((quote, index) => (
           <QuoteSlide
@@ -649,6 +674,7 @@ export const QuoteVideo = ({title, subtitle, source, quotes}: QuoteVideoProps) =
             frame={frame}
             title={title}
             source={source}
+            hideRedundantPurchase={hideRedundantPurchase}
           />
         ))
       )}

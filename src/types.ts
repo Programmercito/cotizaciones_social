@@ -28,4 +28,5 @@ export type QuoteVideoProps = {
   source: string;
   generatedAt: string;
   quotes: Quote[];
+  hideRedundantPurchase?: boolean;
 };
