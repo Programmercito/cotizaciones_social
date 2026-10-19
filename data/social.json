@@ -1,0 +1,105 @@
+{
+  "generated_at": "2026-10-18T21:29:41-04:00",
+  "title": "Cotizaciones de Bolivia",
+  "source": "dolarbolivia.org",
+  "quotes": [
+    {
+      "key": "usdt",
+      "label": "USDT",
+      "subtitle": "Binance P2P",
+      "sale": 7.18,
+      "purchase": 7.12,
+      "updated_at": "2026-10-18 21:29:41",
+      "exchange": "binancep2p",
+      "currency": "BOB",
+      "trend": {
+        "direction": "up",
+        "value": 0.16
+      }
+    },
+    {
+      "key": "usd_oficial",
+      "label": "USD Oficial",
+      "subtitle": "BCB",
+      "sale": 6.86,
+      "purchase": 6.76,
+      "updated_at": "2026-10-18 21:29:41",
+      "exchange": "bcb",
+      "currency": "BOB",
+      "trend": {
+        "direction": "down",
+        "value": -0.09
+      }
+    },
+    {
+      "key": "usd_referencial",
+      "label": "USD Referencial",
+      "subtitle": "BCB",
+      "sale": 7.02,
+      "purchase": 6.92,
+      "updated_at": "2026-10-18 21:29:41",
+      "exchange": "bcb",
+      "currency": "BOB",
+      "trend": {
+        "direction": "down",
+        "value": -0.06
+      }
+    },
+    {
+      "key": "euro",
+      "label": "Euro",
+      "subtitle": "BCB",
+      "sale": 7.95,
+      "purchase": 7.82,
+      "updated_at": "2026-10-18 21:29:41",
+      "exchange": "bcb",
+      "currency": "BOB",
+      "trend": {
+        "direction": "up",
+        "value": 0.05
+      }
+    },
+    {
+      "key": "oro",
+      "label": "Oro",
+      "subtitle": "BCB",
+      "sale": 2650,
+      "purchase": 0,
+      "updated_at": "2026-10-18 21:29:41",
+      "exchange": "bcb",
+      "currency": "USD",
+      "trend": {
+        "direction": "down",
+        "value": -10
+      }
+    },
+    {
+      "key": "plata",
+      "label": "Plata",
+      "subtitle": "BCB",
+      "sale": 31.2,
+      "purchase": 0,
+      "updated_at": "2026-10-18 21:29:41",
+      "exchange": "bcb",
+      "currency": "USD",
+      "trend": {
+        "direction": "equal",
+        "value": 0
+      }
+    },
+    {
+      "key": "ufv",
+      "label": "UFV",
+      "subtitle": "BCB",
+      "sale": 3.05,
+      "purchase": 0,
+      "updated_at": "2026-10-18 21:29:41",
+      "exchange": "bcb",
+      "currency": "BOB",
+      "trend": {
+        "direction": "up",
+        "value": 0.01
+      }
+    }
+  ]
+}
