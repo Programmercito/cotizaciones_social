@@ -1,6 +1,6 @@
 import {bundle} from '@remotion/bundler';
 import {renderMedia, selectComposition} from '@remotion/renderer';
-import {mkdir, readFile} from 'node:fs/promises';
+import {copyFile, mkdir, readFile} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {parseQuoteSnapshot, splitQuotes} from '../src/data';
@@ -11,6 +11,7 @@ const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '
 const readArguments = (args: string[]) => {
   let input = path.join(projectRoot, 'data', 'social.json');
   let outDir = path.join(projectRoot, 'out');
+  let explicitInput = false;
 
   for (let index = 0; index < args.length; index += 1) {
     const arg = args[index];
@@ -22,6 +23,7 @@ const readArguments = (args: string[]) => {
 
       if (arg === '--input') {
         input = path.resolve(value);
+        explicitInput = true;
       } else {
         outDir = path.resolve(value);
       }
@@ -33,7 +35,7 @@ const readArguments = (args: string[]) => {
     throw new Error(`Argumento no reconocido: ${arg}`);
   }
 
-  return {input, outDir};
+  return {input, outDir, additionalOutDir: explicitInput ? path.dirname(input) : null};
 };
 
 const renderVideo = async (
@@ -55,7 +57,7 @@ const renderVideo = async (
 };
 
 const main = async () => {
-  const {input, outDir} = readArguments(process.argv.slice(2));
+  const {input, outDir, additionalOutDir} = readArguments(process.argv.slice(2));
   let raw: string;
   try {
     raw = await readFile(input, 'utf8');
@@ -100,6 +102,19 @@ const main = async () => {
 
   await renderVideo(serveUrl, 'usd-usdt', path.join(outDir, 'usd-usdt.mp4'), data[0]);
   await renderVideo(serveUrl, 'otros-activos', path.join(outDir, 'otros-activos.mp4'), data[1]);
+
+  if (additionalOutDir) {
+    const additionalOutputs: [string, string][] = [
+      [path.join(outDir, 'usd-usdt.mp4'), path.join(additionalOutDir, 'usd.mp4')],
+      [path.join(outDir, 'otros-activos.mp4'), path.join(additionalOutDir, 'otros.mp4')],
+    ];
+    await Promise.all(
+      additionalOutputs.map(async ([source, destination]) => {
+        await copyFile(source, destination);
+        console.log(`Copia adicional generada: ${destination}`);
+      }),
+    );
+  }
 };
 
 main().catch((error: unknown) => {

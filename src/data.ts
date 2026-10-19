@@ -148,8 +148,11 @@ export const formatDateTime = (value: string): string => {
   const time = /[T ](\d{2}):(\d{2})/.exec(value);
   return time
     ? `${formatDate(value)} · ${time[1]}:${time[2]}`
-    : `${formatDate(value)} · hora no informada`;
+    : formatDate(value);
 };
+
+export const formatQuoteUpdatedAt = (quote: Pick<Quote, 'key' | 'updated_at'>): string =>
+  quote.key === 'usdt' ? formatDateTime(quote.updated_at) : formatDate(quote.updated_at);
 
 export const trendLabel: Record<TrendDirection, string> = {
   up: 'SUBE',

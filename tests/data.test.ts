@@ -5,6 +5,7 @@ import {
   formatCurrency,
   formatDate,
   formatDateTime,
+  formatQuoteUpdatedAt,
   formatTrendValue,
   parseQuoteSnapshot,
   splitQuotes,
@@ -61,6 +62,22 @@ describe('social.json quote data', () => {
     expect(formatTrendValue(-10, 'USD')).toBe('−10,00 USD');
     expect(formatDate('2026-10-18 21:29:41')).toBe('18/10/2026');
     expect(formatDateTime('2026-10-18T21:29:41-04:00')).toBe('18/10/2026 · 21:29');
+    expect(formatDateTime('2026-10-18')).toBe('18/10/2026');
+  });
+
+  it('shows an hour only for USDT and keeps other quote timestamps date-only', () => {
+    const {primary, other} = splitQuotes(snapshot);
+
+    expect(primary.map((quote) => formatQuoteUpdatedAt(quote))).toEqual([
+      '18/10/2026',
+      '18/10/2026 · 21:29',
+    ]);
+    expect(other.map((quote) => formatQuoteUpdatedAt(quote))).toEqual([
+      '18/10/2026',
+      '18/10/2026',
+      '18/10/2026',
+      '18/10/2026',
+    ]);
   });
 
   it('rejects a trend direction that conflicts with its signed value', () => {

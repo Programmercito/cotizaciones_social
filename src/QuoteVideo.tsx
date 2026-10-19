@@ -1,6 +1,6 @@
 import {AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig} from 'remotion';
 import type {Quote, QuoteVideoProps} from './types';
-import {formatCurrency, formatDateTime, formatTrendValue, trendLabel} from './data';
+import {formatCurrency, formatQuoteUpdatedAt, formatTrendValue, trendLabel} from './data';
 
 export const INTRO_FRAMES = 45;
 export const QUOTE_FRAMES = 150;
@@ -42,7 +42,7 @@ const QuoteTimestamp = ({timestamp, compact = false}: {timestamp: string; compac
       ACTUALIZADO
     </div>
     <div style={{fontSize: compact ? 62 : 72, fontWeight: 800, color: palette.text}}>
-      {formatDateTime(timestamp)}
+      {timestamp}
     </div>
   </div>
 );
@@ -357,7 +357,7 @@ const QuoteSlide = ({
           {quote.subtitle.toUpperCase()}
         </div>
         <div style={{marginTop: 22}}>
-          <QuoteTimestamp timestamp={quote.updated_at} compact />
+          <QuoteTimestamp timestamp={formatQuoteUpdatedAt(quote)} compact />
         </div>
       </div>
 
@@ -578,7 +578,7 @@ const Recap = ({
                       ACTUALIZADO
                     </div>
                     <div style={{fontSize: spacious ? 72 : 58, color: palette.text, fontWeight: 900, lineHeight: 1}}>
-                      {formatDateTime(quote.updated_at)}
+                      {formatQuoteUpdatedAt(quote)}
                     </div>
                   </div>
                 </div>
