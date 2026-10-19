@@ -52,6 +52,7 @@ const renderVideo = async (
     outputLocation,
     inputProps,
     concurrency: 2,
+    chromiumOptions: {enableMultiProcessOnLinux: true},
   });
   console.log(`Video generado: ${outputLocation}`);
 };
