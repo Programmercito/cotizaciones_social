@@ -444,8 +444,8 @@ const Recap = ({
   title,
   source,
   quotes,
-}: Pick<QuoteVideoProps, 'title' | 'source' | 'quotes'>) => {
-  const frame = useCurrentFrame();
+  frame,
+}: Pick<QuoteVideoProps, 'title' | 'source' | 'quotes'> & {frame: number}) => {
   const {fps} = useVideoConfig();
   const entrance = spring({frame, fps, config: {damping: 16, stiffness: 115}});
   const spacious = quotes.length <= 2;
@@ -638,7 +638,7 @@ export const QuoteVideo = ({title, subtitle, source, quotes}: QuoteVideoProps) =
       {frame < INTRO_FRAMES ? (
         <Intro title={title} subtitle={subtitle} source={source} />
       ) : frame >= recapStart ? (
-        <Recap title={title} source={source} quotes={quotes} />
+        <Recap title={title} source={source} quotes={quotes} frame={frame - recapStart} />
       ) : (
         quotes.map((quote, index) => (
           <QuoteSlide

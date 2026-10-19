@@ -1,5 +1,5 @@
 import {bundle} from '@remotion/bundler';
-import {renderMedia, selectComposition} from '@remotion/renderer';
+import {renderMedia, renderStill, selectComposition} from '@remotion/renderer';
 import {copyFile, mkdir, readFile} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -57,6 +57,24 @@ const renderVideo = async (
   console.log(`Video generado: ${outputLocation}`);
 };
 
+const renderStillImage = async (
+  serveUrl: string,
+  id: string,
+  outputLocation: string,
+  inputProps: QuoteVideoProps,
+) => {
+  const composition = await selectComposition({serveUrl, id, inputProps});
+  await renderStill({
+    composition,
+    serveUrl,
+    output: outputLocation,
+    frame: composition.durationInFrames - 1,
+    inputProps,
+    chromiumOptions: {enableMultiProcessOnLinux: true},
+  });
+  console.log(`Imagen final generada: ${outputLocation}`);
+};
+
 const main = async () => {
   const {input, outDir, additionalOutDir} = readArguments(process.argv.slice(2));
   let raw: string;
@@ -103,11 +121,15 @@ const main = async () => {
 
   await renderVideo(serveUrl, 'usd-usdt', path.join(outDir, 'usd-usdt.mp4'), data[0]);
   await renderVideo(serveUrl, 'otros-activos', path.join(outDir, 'otros-activos.mp4'), data[1]);
+  await renderStillImage(serveUrl, 'usd-usdt', path.join(outDir, 'usd-usdt.png'), data[0]);
+  await renderStillImage(serveUrl, 'otros-activos', path.join(outDir, 'otros-activos.png'), data[1]);
 
   if (additionalOutDir) {
     const additionalOutputs: [string, string][] = [
       [path.join(outDir, 'usd-usdt.mp4'), path.join(additionalOutDir, 'usd.mp4')],
       [path.join(outDir, 'otros-activos.mp4'), path.join(additionalOutDir, 'otros.mp4')],
+      [path.join(outDir, 'usd-usdt.png'), path.join(additionalOutDir, 'usd.png')],
+      [path.join(outDir, 'otros-activos.png'), path.join(additionalOutDir, 'otros.png')],
     ];
     await Promise.all(
       additionalOutputs.map(async ([source, destination]) => {
