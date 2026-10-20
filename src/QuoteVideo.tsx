@@ -1,4 +1,4 @@
-import {AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig} from 'remotion';
+import {AbsoluteFill, Audio, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig} from 'remotion';
 import type {Quote, QuoteVideoProps} from './types';
 import {formatCurrency, formatDate, formatQuoteUpdatedAt, formatTrendValue, trendLabel} from './data';
 
@@ -629,6 +629,8 @@ export const QuoteVideo = ({title, subtitle, source, renderedAt, quotes, hideRed
         fontFamily: 'Arial, Helvetica, sans-serif',
       }}
     >
+      <Audio src={staticFile('ambient.wav')} loop volume={0.12} />
+
       <div style={{position: 'absolute', inset: 0, opacity: 0.075}}>
         <svg width="100%" height="100%" viewBox="0 0 1080 1920" preserveAspectRatio="none">
           <defs>
