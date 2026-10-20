@@ -335,8 +335,8 @@ const QuoteSlide = ({
         background: `radial-gradient(ellipse at 93% 39%, ${accent}12, transparent 39%)`,
       }}
     >
-      <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 22}}>
-        <div>
+      <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 22}}>
+        <div style={{textAlign: 'center'}}>
           <div style={{fontSize: 18, fontWeight: 800, letterSpacing: 5, color: palette.green}}>
             BOLIVIA <span style={{color: '#76939b'}}>·</span> {title.toUpperCase()}
           </div>
@@ -360,13 +360,13 @@ const QuoteSlide = ({
       </div>
 
       <div style={{marginTop: 54}}>
-        <div style={{fontSize: 78, fontWeight: 900, letterSpacing: -3, lineHeight: 1, color: palette.text}}>
+        <div style={{fontSize: 78, fontWeight: 900, letterSpacing: -3, lineHeight: 1, color: palette.text, textAlign: 'center'}}>
           {quote.label}
         </div>
-        <div style={{fontSize: 25, marginTop: 11, color: palette.muted, letterSpacing: 1.4}}>
+        <div style={{fontSize: 25, marginTop: 11, color: palette.muted, letterSpacing: 1.4, textAlign: 'center'}}>
           {quote.subtitle.toUpperCase()}
         </div>
-        <div style={{marginTop: 22}}>
+        <div style={{display: 'flex', justifyContent: 'center', marginTop: 22}}>
           <QuoteTimestamp timestamp={formatQuoteUpdatedAt(quote)} compact />
         </div>
       </div>
@@ -441,7 +441,7 @@ const QuoteSlide = ({
         </div>
       </div>
 
-      <div style={{display: 'flex', justifyContent: 'flex-start', alignItems: 'center', gap: 16, marginTop: 28}}>
+      <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 16, marginTop: 28}}>
         <div style={{fontSize: 24, fontWeight: 700, color: palette.muted, letterSpacing: 0.8}}>
           {source.toUpperCase()}
         </div>
@@ -525,8 +525,9 @@ const Recap = ({
                   boxSizing: 'border-box',
                   display: 'flex',
                   flexDirection: 'column',
+                  alignItems: 'center',
                   justifyContent: 'space-between',
-                  padding: spacious ? '31px 38px' : '16px 26px',
+                  padding: spacious ? '31px 38px' : '12px 18px',
                   borderRadius: 28,
                   background: 'linear-gradient(125deg, rgba(17, 52, 60, .98), rgba(9, 31, 40, .98))',
                   border: `1px solid ${accent}42`,
@@ -534,14 +535,14 @@ const Recap = ({
                   boxShadow: '0 14px 36px rgba(0, 0, 0, .18)',
                 }}
               >
-                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 14, minWidth: 0}}>
-                  <div style={{minWidth: 0, fontSize: spacious ? 68 : 46, fontWeight: 900, letterSpacing: -1.5, color: palette.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>
+                <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, minWidth: 0, width: '100%'}}>
+                  <div style={{minWidth: 0, fontSize: spacious ? 68 : 42, fontWeight: 900, letterSpacing: -1.5, color: palette.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>
                     {quote.label}
                   </div>
                   <div
                     style={{
                       minWidth: 0,
-                      fontSize: spacious ? 34 : 28,
+                      fontSize: spacious ? 34 : 23,
                       color: accent,
                       fontWeight: 900,
                       whiteSpace: 'nowrap',
@@ -556,22 +557,22 @@ const Recap = ({
                   style={{
                     display: 'grid',
                     gridTemplateColumns: hasPurchase && !spacious ? '1fr 1fr' : '1fr',
-                    gap: 18,
-                    marginTop: 12,
+                    gap: 12,
+                    marginTop: 6,
                     minWidth: 0,
                   }}
                 >
                   <div style={{minWidth: 0, overflow: 'hidden', textAlign: 'center'}}>
-                    <div style={{fontSize: spacious ? 23 : 18, color: palette.muted, fontWeight: 800, letterSpacing: 2}}>
+                    <div style={{fontSize: spacious ? 23 : 15, color: palette.muted, fontWeight: 800, letterSpacing: 2}}>
                       VENTA
                     </div>
-                    <div style={{fontSize: hasPurchase ? amountFontSize(sale, spacious) : spacious ? 104 : 80, color: palette.text, fontWeight: 900, letterSpacing: -1.5, whiteSpace: 'nowrap'}}>
+                    <div style={{fontSize: hasPurchase ? amountFontSize(sale, spacious) : spacious ? 104 : 64, color: palette.text, fontWeight: 900, letterSpacing: -1.5, whiteSpace: 'nowrap'}}>
                       {sale}
                     </div>
                   </div>
                   {hasPurchase && (
                     <div style={{minWidth: 0, overflow: 'hidden', textAlign: 'center'}}>
-                      <div style={{fontSize: spacious ? 23 : 18, color: palette.muted, fontWeight: 800, letterSpacing: 2}}>
+                      <div style={{fontSize: spacious ? 23 : 15, color: palette.muted, fontWeight: 800, letterSpacing: 2}}>
                         COMPRA
                       </div>
                       <div
@@ -588,15 +589,15 @@ const Recap = ({
                     </div>
                   )}
                 </div>
-                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 16, marginTop: 12}}>
-                  <div style={{fontSize: spacious ? 25 : 22, color: '#a6bdc2', fontWeight: 700}}>
+                <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, marginTop: 6, textAlign: 'center'}}>
+                  <div style={{fontSize: spacious ? 25 : 15, color: '#a6bdc2', fontWeight: 700}}>
                     {quote.subtitle.toUpperCase()}
                   </div>
-                  <div style={{textAlign: 'right', whiteSpace: 'nowrap'}}>
-                    <div style={{fontSize: spacious ? 17 : 16, color: palette.gold, fontWeight: 900, letterSpacing: 1}}>
+                  <div style={{textAlign: 'center', whiteSpace: 'nowrap'}}>
+                    <div style={{fontSize: spacious ? 17 : 12, color: palette.gold, fontWeight: 900, letterSpacing: 1}}>
                       ACTUALIZADO
                     </div>
-                    <div style={{fontSize: spacious ? 60 : 50, color: palette.text, fontWeight: 900, lineHeight: 1}}>
+                    <div style={{fontSize: spacious ? 60 : 28, color: palette.text, fontWeight: 900, lineHeight: 1}}>
                       {formatQuoteUpdatedAt(quote)}
                     </div>
                   </div>
