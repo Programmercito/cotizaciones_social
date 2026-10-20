@@ -19,13 +19,13 @@ npm run render
 Para procesar el JSON actualizado desde el proyecto cotiza:
 
 ```powershell
-npm run render -- --input "C:\opt\osbo\cotiza\social.json"
+npm run render -- --input "/opt/osbo/cotiza/social.json" --out-dir "/opt/osbo/cotiza"
 ```
 
-Se guardan `usdt.mp4`, `resto.mp4`, `usdt.png` y `resto.png` en `out\`. Al indicar un JSON con `--input`, también se crean esos mismos archivos junto a ese archivo. Para cambiar la carpeta de salida:
+En producción, `usdt.mp4`, `resto.mp4`, `usdt.png` y `resto.png` se generan directamente en `/opt/osbo/cotiza`. Al indicar un JSON con `--input`, también se crean esos mismos archivos junto a ese archivo. Para cambiar la carpeta de salida:
 
 ```powershell
-npm run render -- --input "C:\opt\osbo\cotiza\social.json" --out-dir "C:\ruta\de\salida"
+npm run render -- --input "/opt/osbo/cotiza/social.json" --out-dir "/ruta/de/salida"
 ```
 
 Se generan solo dos videos: **Dólar** (USD Oficial y USDT) y **Otras cotizaciones** (Euro, Oro, Plata y UFV). USD Referencial se omite. En cada activo, primero aparece la tendencia animada; después se muestran los importes de compra y venta en grande y centrados. Si el JSON no trae compra, se muestra únicamente venta. Ambos videos incluyen un sello legible con la fecha y hora de `generated_at`, y terminan con un resumen en pantalla de todas sus cotizaciones durante 10 segundos. La flecha y la variación usan `trend.direction` y `trend.value` tal como los entrega la fuente.
