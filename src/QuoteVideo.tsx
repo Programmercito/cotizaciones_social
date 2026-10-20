@@ -593,10 +593,10 @@ const Recap = ({
                     {quote.subtitle.toUpperCase()}
                   </div>
                   <div style={{textAlign: 'right', whiteSpace: 'nowrap'}}>
-                    <div style={{fontSize: spacious ? 20 : 18, color: palette.gold, fontWeight: 900, letterSpacing: 1}}>
+                    <div style={{fontSize: spacious ? 17 : 16, color: palette.gold, fontWeight: 900, letterSpacing: 1}}>
                       ACTUALIZADO
                     </div>
-                    <div style={{fontSize: spacious ? 72 : 58, color: palette.text, fontWeight: 900, lineHeight: 1}}>
+                    <div style={{fontSize: spacious ? 60 : 50, color: palette.text, fontWeight: 900, lineHeight: 1}}>
                       {formatQuoteUpdatedAt(quote)}
                     </div>
                   </div>
