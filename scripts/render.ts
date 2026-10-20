@@ -69,6 +69,7 @@ const renderStillImage = async (
     serveUrl,
     output: outputLocation,
     frame: composition.durationInFrames - 1,
+    imageFormat: 'jpeg',
     inputProps,
     chromiumOptions: {enableMultiProcessOnLinux: true},
   });
@@ -122,15 +123,15 @@ const main = async () => {
 
   await renderVideo(serveUrl, 'usd-usdt', path.join(outDir, 'usdt.mp4'), data[0]);
   await renderVideo(serveUrl, 'otros-activos', path.join(outDir, 'resto.mp4'), data[1]);
-  await renderStillImage(serveUrl, 'usd-usdt', path.join(outDir, 'usdt.png'), data[0]);
-  await renderStillImage(serveUrl, 'otros-activos', path.join(outDir, 'resto.png'), data[1]);
+  await renderStillImage(serveUrl, 'usd-usdt', path.join(outDir, 'usdt.jpg'), data[0]);
+  await renderStillImage(serveUrl, 'otros-activos', path.join(outDir, 'resto.jpg'), data[1]);
 
   if (additionalOutDir) {
     const additionalOutputs: [string, string][] = [
       [path.join(outDir, 'usdt.mp4'), path.join(additionalOutDir, 'usdt.mp4')],
       [path.join(outDir, 'resto.mp4'), path.join(additionalOutDir, 'resto.mp4')],
-      [path.join(outDir, 'usdt.png'), path.join(additionalOutDir, 'usdt.png')],
-      [path.join(outDir, 'resto.png'), path.join(additionalOutDir, 'resto.png')],
+      [path.join(outDir, 'usdt.jpg'), path.join(additionalOutDir, 'usdt.jpg')],
+      [path.join(outDir, 'resto.jpg'), path.join(additionalOutDir, 'resto.jpg')],
     ];
     await Promise.all(
       additionalOutputs.map(async ([source, destination]) => {

@@ -22,7 +22,7 @@ Para procesar el JSON actualizado desde el proyecto cotiza:
 npm run render -- --input "/opt/osbo/cotiza/social.json" --out-dir "/opt/osbo/cotiza"
 ```
 
-En producción, `usdt.mp4`, `resto.mp4`, `usdt.png` y `resto.png` se generan directamente en `/opt/osbo/cotiza`. Al indicar un JSON con `--input`, también se crean esos mismos archivos junto a ese archivo. Para cambiar la carpeta de salida:
+En producción, `usdt.mp4`, `resto.mp4`, `usdt.jpg` y `resto.jpg` se generan directamente en `/opt/osbo/cotiza`. Al indicar un JSON con `--input`, también se crean esos mismos archivos junto a ese archivo. Para cambiar la carpeta de salida:
 
 ```powershell
 npm run render -- --input "/opt/osbo/cotiza/social.json" --out-dir "/ruta/de/salida"
