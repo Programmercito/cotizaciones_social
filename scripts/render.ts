@@ -8,6 +8,12 @@ import type {QuoteVideoProps} from '../src/types';
 
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
+const currentTimestamp = () => {
+  const now = new Date();
+  const pad = (value: number) => String(value).padStart(2, '0');
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+};
+
 const readArguments = (args: string[]) => {
   let input = path.join(projectRoot, 'data', 'social.json');
   let outDir = path.join(projectRoot, 'out');
@@ -94,6 +100,7 @@ const main = async () => {
 
   const snapshot = parseQuoteSnapshot(parsed);
   const {primary, other} = splitQuotes(snapshot);
+  const renderedAt = currentTimestamp();
   if (other.length === 0) {
     throw new Error('Se requiere al menos una cotización además de USD Oficial y USDT.');
   }
@@ -104,6 +111,7 @@ const main = async () => {
       subtitle: 'USD Oficial + USDT · cotizaciones del dólar.',
       source: snapshot.source,
       generatedAt: snapshot.generated_at,
+      renderedAt,
       quotes: primary,
     },
     {
@@ -111,6 +119,7 @@ const main = async () => {
       subtitle: 'Euro · Oro · Plata · UFV.',
       source: snapshot.source,
       generatedAt: snapshot.generated_at,
+      renderedAt,
       quotes: other,
       hideRedundantPurchase: true,
     },

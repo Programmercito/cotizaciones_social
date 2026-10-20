@@ -7,6 +7,7 @@ const defaultProps: QuoteVideoProps = {
   subtitle: '',
   source: '',
   generatedAt: '2026-01-01',
+  renderedAt: '2026-01-01 00:00:00',
   quotes: [],
 };
 

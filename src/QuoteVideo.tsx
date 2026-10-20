@@ -1,6 +1,6 @@
 import {AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig} from 'remotion';
 import type {Quote, QuoteVideoProps} from './types';
-import {formatCurrency, formatQuoteUpdatedAt, formatTrendValue, trendLabel} from './data';
+import {formatCurrency, formatDate, formatQuoteUpdatedAt, formatTrendValue, trendLabel} from './data';
 
 export const INTRO_FRAMES = 45;
 export const QUOTE_FRAMES = 150;
@@ -607,27 +607,12 @@ const Recap = ({
           })}
         </div>
 
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            marginTop: 20,
-            gap: 12,
-            opacity: entrance,
-            transform: `translateY(${(1 - entrance) * 48}px) scale(${0.92 + entrance * 0.08})`,
-          }}
-        >
-          <div style={{textAlign: 'center', fontSize: 18, color: '#9ab0b5', letterSpacing: 0.8}}>
-            FUENTE: {source.toUpperCase()} · VARIACIÓN REPORTADA, NO PROYECTADA
-          </div>
-        </div>
       </div>
     </AbsoluteFill>
   );
 };
 
-export const QuoteVideo = ({title, subtitle, source, quotes, hideRedundantPurchase = false}: QuoteVideoProps) => {
+export const QuoteVideo = ({title, subtitle, source, renderedAt, quotes, hideRedundantPurchase = false}: QuoteVideoProps) => {
   const frame = useCurrentFrame();
   const {durationInFrames} = useVideoConfig();
   const recapStart = INTRO_FRAMES + quotes.length * QUOTE_FRAMES;
@@ -679,6 +664,21 @@ export const QuoteVideo = ({title, subtitle, source, quotes, hideRedundantPurcha
           />
         ))
       )}
+
+      <div
+        style={{
+          position: 'absolute',
+          right: 28,
+          bottom: 18,
+          zIndex: 2,
+          color: '#9ab0b5',
+          fontSize: 15,
+          letterSpacing: 0.5,
+          opacity: 0.72,
+        }}
+      >
+        GENERADO EL {formatDate(renderedAt)} A LAS {renderedAt.slice(11, 19)}
+      </div>
 
       <div style={{position: 'absolute', left: 0, right: 0, bottom: 0, height: 8, background: 'rgba(166, 189, 194, .12)'}}>
         <div
